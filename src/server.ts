@@ -1,14 +1,14 @@
 import express, { Request, Response } from 'express'
 import {Server} from 'http'
 import mongoose from 'mongoose';
-
+import 'dotenv/config'
 let server: Server ;
 
 const app = express()
 
 const starSever = async()=>{
     try {
-        await mongoose.connect("mongodb+srv://libraryManagementDB:5guPN4JmSRiEr3Nm@cluster0.dgvjh.mongodb.net/tour-management-DB?retryWrites=true&w=majority&appName=Cluster0")
+        await mongoose.connect(`mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.dgvjh.mongodb.net/tour-management-DB?retryWrites=true&w=majority&appName=Cluster0`)
         console.log("connected to DB")
 
         server = app.listen(5000, ()=>{
@@ -22,8 +22,46 @@ const starSever = async()=>{
 
 starSever()
 
+process.on("unhandledRejection", (err)=>{
+    console.log("Unhandled Rejection Detected... Server Shutting down", err)
+
+    if(server){
+        server.close(()=>{
+            process.exit(1)
+        })
+    }
+    process.exit(1)
+})
+
+process.on("SIGINT", (err)=>{
+    console.log("SIGTERM Detected... Server Shutting down", err)
+
+    if(server){
+        server.close(()=>{
+            process.exit(1)
+        })
+    }
+    process.exit(1)
+})
+process.on("SIGINT", (err)=>{
+    console.log("SIGINT Detected... Server Shutting down", err)
+
+    if(server){
+        server.close(()=>{
+            process.exit(1)
+        })
+    }
+    process.exit(1)
+})
+
+// Promise.reject(new Error("I forgot to catch this Promise"))
+
+// throw new Error(" I forgot this local error")
+
 app.get('/', (req:Request, res:Response)=>{
     res.status(200).json({
         massage:"Welcome to tour management system backend"
     })
 })
+
+
