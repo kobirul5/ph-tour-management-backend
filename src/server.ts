@@ -1,10 +1,11 @@
-import express, { Request, Response } from 'express'
+/* eslint-disable no-console */
 import {Server} from 'http'
 import mongoose from 'mongoose';
 import 'dotenv/config'
+import { app } from './app';
 let server: Server ;
 
-const app = express()
+
 
 const starSever = async()=>{
     try {
@@ -32,6 +33,17 @@ process.on("unhandledRejection", (err)=>{
     }
     process.exit(1)
 })
+process.on("uncaughtException", (err)=>{
+    console.log("Uncaught Exception Detected... Server Shutting down", err)
+
+    if(server){
+        server.close(()=>{
+            process.exit(1)
+        })
+    }
+    process.exit(1)
+})
+
 
 process.on("SIGINT", (err)=>{
     console.log("SIGTERM Detected... Server Shutting down", err)
@@ -58,10 +70,6 @@ process.on("SIGINT", (err)=>{
 
 // throw new Error(" I forgot this local error")
 
-app.get('/', (req:Request, res:Response)=>{
-    res.status(200).json({
-        massage:"Welcome to tour management system backend"
-    })
-})
+
 
 
