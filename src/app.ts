@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { router } from './app/routes'
+import { globalErrorHandler } from './middlewares/globalErrorHandler'
+import notFound from './middlewares/notFound'
 export const app = express()
 
 app.use(express.json())
@@ -14,3 +16,6 @@ app.get('/', (req:Request, res:Response)=>{
         massage:"Welcome to tour management system backend"
     })
 })
+
+app.use(globalErrorHandler)
+app.use(notFound)
