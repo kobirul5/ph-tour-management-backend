@@ -4,11 +4,12 @@ import mongoose from 'mongoose';
 import 'dotenv/config'
 import { app } from './app';
 import { envVars } from './app/config/env';
+import { seedSuperAdmin } from './app/utils/seedSuperAdmin';
 let server: Server;
 
 
 
-const starSever = async () => {
+const startServer = async () => {
 
     try {
         await mongoose.connect(envVars.DB_URL)
@@ -23,7 +24,11 @@ const starSever = async () => {
     }
 }
 
-starSever()
+(async () => {
+    await startServer()
+    await seedSuperAdmin()
+})()
+
 
 process.on("unhandledRejection", (err) => {
     console.log("Unhandled Rejection Detected... Server Shutting down", err)
