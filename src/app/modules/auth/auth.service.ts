@@ -3,7 +3,7 @@ import { IUser } from "../user/user.intrface"
 import httpStatus from 'http-status-codes'
 import { User } from "../user/user.model";
 import bcrypt from "bcryptjs";
-import { createUserTokens } from "../../utils/usertoken";
+import { createNewAccessTokenWithRefreshToken, createUserTokens } from "../../utils/usertoken";
 
 const credentialLogin = async (payload: Partial<IUser>)=>{
 const {email, password} = payload;
@@ -25,6 +25,7 @@ const {email, password} = payload;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: pass , ...rest} = isUserExist.toObject()
 
+    
 
     return {
         accessToken: userToken.accessToken,
@@ -37,6 +38,17 @@ const {email, password} = payload;
 }
 
 
+const getNewAccessToken = async (refreshToken: string) => {
+    console.log(refreshToken, "-----------")
+    const newAccessToken = await createNewAccessTokenWithRefreshToken(refreshToken)
+
+    return {
+        accessToken: newAccessToken
+    }
+
+}
+
 export const AuthServices = {
-    credentialLogin
+    credentialLogin,
+    getNewAccessToken,
 }

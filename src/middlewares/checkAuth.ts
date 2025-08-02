@@ -18,7 +18,8 @@ export const checkAuth= (...authRoles: string[]) => async (req: Request, res: Re
         throw new AppError(403, "Invalid Token")    
     }
 
-    if(authRoles.includes(verifyToken.role)){
+    console.log(verifyToken.role,"---------")
+    if(!authRoles.includes(verifyToken.role)){
         throw new AppError(403, "Your are not permitted for view this route")  
     }
 
