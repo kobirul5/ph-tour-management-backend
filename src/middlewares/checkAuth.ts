@@ -1,28 +1,47 @@
 import { NextFunction, Request, Response } from "express";
-import { JwtUtils } from "../app/utils/jwt";
-import AppError from "../app/errorHelpers/AppError";
-import { envVars } from "../app/config/env";
+import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
+import AppError from "../app/errorHelpers/AppError";
+import { jwtUtils } from "../app/utils/jwt";
+import { User } from "../app/modules/user/user.model";
+import { envVars } from "../app/config/env";
+import { IsActive } from "../app/modules/user/user.intrface";
+
+export const checkAuth = (...authRoles: string[]) => async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const accessToken = req.headers.authorization;
+
+        if (!accessToken) {
+            throw new AppError(403, "No Token Recieved")
+        }
 
 
-export const checkAuth= (...authRoles: string[]) => async (req: Request, res: Response, next: NextFunction)=>{
-    const accessToken = req.headers.authorization;
+        const verifiedToken = jwtUtils.verifyToken(accessToken, envVars.JWT_SECRET as string) as JwtPayload
 
-    if(!accessToken){
-        throw new AppError(403, "No Token Recived")
+        const isUserExist = await User.findOne({ email: verifiedToken.email })
+
+        if (!isUserExist) {
+            throw new AppError(httpStatus.BAD_REQUEST, "User does not exist")
+        }
+        if (!isUserExist.isVerified) {
+            throw new AppError(httpStatus.BAD_REQUEST, "User is not verified")
+        }
+        if (isUserExist.isActive === IsActive.BLOCKED || isUserExist.isActive === IsActive.INACTIVE) {
+            throw new AppError(httpStatus.BAD_REQUEST, `User is ${isUserExist.isActive}`)
+        }
+        if (isUserExist.isDeleted) {
+            throw new AppError(httpStatus.BAD_REQUEST, "User is deleted")
+        }
+
+        if (!authRoles.includes(verifiedToken.role)) {
+            throw new AppError(403, "You are not permitted to view this route!!!")
+        }
+        req.user = verifiedToken
+        next()
+
+    } catch (error) {
+        console.log("jwt error", error);
+        next(error)
     }
-    const verifyToken = JwtUtils.verifyToken(accessToken, envVars.JWT_SECRET as string) as JwtPayload;
-
-
-    if(!verifyToken ){
-        throw new AppError(403, "Invalid Token")    
-    }
-
-    console.log(verifyToken.role,"---------")
-    if(!authRoles.includes(verifyToken.role)){
-        throw new AppError(403, "Your are not permitted for view this route")  
-    }
-
-    next()
-
 }

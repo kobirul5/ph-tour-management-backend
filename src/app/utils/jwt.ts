@@ -17,7 +17,7 @@ const verifyToken = (token: string, secret: string): JwtPayload | null => {
     }
 };
 
-export const JwtUtils = {
+export const jwtUtils = {
     generateToken,
     verifyToken
 }
