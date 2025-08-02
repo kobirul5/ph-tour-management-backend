@@ -1,7 +1,7 @@
 
 import { envVars } from "../config/env";
 import httpStatus from "http-status-codes";
-import { JwtUtils } from "./jwt";
+import { jwtUtils } from "./jwt";
 import { IsActive, IUser } from "../modules/user/user.intrface";
 import { User } from "../modules/user/user.model";
 import AppError from "../errorHelpers/AppError";
@@ -14,9 +14,9 @@ export const createUserTokens = (user: Partial<IUser>) => {
         email: user.email,
         role: user.role
     }
-    const accessToken = JwtUtils.generateToken(jwtPayload, envVars.JWT_SECRET as string, envVars.JWT_EXPIRATION as string)
+    const accessToken = jwtUtils.generateToken(jwtPayload, envVars.JWT_SECRET as string, envVars.JWT_EXPIRATION as string)
 
-    const refreshToken = JwtUtils.generateToken(jwtPayload, envVars.JWT_REFRESH_EXPIRATION as string, envVars.JWT_REFRESH_EXPIRATION as string)
+    const refreshToken = jwtUtils.generateToken(jwtPayload, envVars.JWT_REFRESH_EXPIRATION as string, envVars.JWT_REFRESH_EXPIRATION as string)
 
 
     return {
@@ -36,7 +36,7 @@ export const createNewAccessTokenWithRefreshToken = async (refreshToken: string)
     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "JWT_EXPIRATION is not defined.");
   }
 
-  const verifiedRefreshToken = JwtUtils.verifyToken(
+  const verifiedRefreshToken = jwtUtils.verifyToken(
     refreshToken,
     envVars.JWT_REFRESH_SECRET
   ) as JwtPayload;
@@ -62,7 +62,7 @@ export const createNewAccessTokenWithRefreshToken = async (refreshToken: string)
     role: isUserExist.role,
   };
 
-  const accessToken = JwtUtils.generateToken(
+  const accessToken = jwtUtils.generateToken(
     jwtPayload,
     envVars.JWT_SECRET,
     envVars.JWT_EXPIRATION
